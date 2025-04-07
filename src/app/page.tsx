@@ -16,7 +16,7 @@ const initialValue = {
             format: 0,
             mode: 'normal',
             style: '',
-            text: 'This is a minimal editor with only essential formatting options',
+            text: 'Hello, welcome to the powerful editor!',
             type: 'text',
             version: 1,
           },
