@@ -1,47 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { $getRoot, $isTextNode, EditorState, SerializedEditorState } from 'lexical'
-import { Editor } from '@/components/lexicalEditor/blocks/editor'
-
-// Define plugin options interface for type safety
-export interface PluginOptions {
-  history?: boolean;
-  autoFocus?: boolean;
-  richText?: boolean;
-  checkList?: boolean;
-  horizontalRule?: boolean;
-  table?: boolean;
-  list?: boolean;
-  tabIndentation?: boolean;
-  hashtag?: boolean;
-  mentions?: boolean;
-  draggableBlock?: boolean;
-  images?: boolean;
-  inlineImage?: boolean;
-  excalidraw?: boolean;
-  poll?: boolean;
-  equations?: boolean;
-  autoEmbed?: boolean;
-  figma?: boolean;
-  twitter?: boolean;
-  youtube?: boolean;
-  codeHighlight?: boolean;
-  markdownShortcut?: boolean;
-  autoLink?: boolean;
-  link?: boolean;
-  componentPicker?: boolean;
-  contextMenu?: boolean;
-  dragDropPaste?: boolean;
-  emojiPicker?: boolean;
-  floatingLinkEditor?: boolean;
-  floatingTextFormat?: boolean;
-  maxIndentLevel?: boolean;
-  beautifulMentions?: boolean;
-  showToolbar?: boolean;
-  showBottomBar?: boolean;
-}
-
+import { useState } from 'react'
+import { SerializedEditorState } from 'lexical'
+import { Editor, PluginOptions } from '@/components/lexicalEditor/blocks/editor'
+import axios from 'axios'
+import { MentionMenu, MentionMenuItem } from '@/components/lexicalEditor/components/editor-ui/MentionMenu'
 // Default value for the editor
 const initialValue = {
   root: {
@@ -53,7 +16,7 @@ const initialValue = {
             format: 0,
             mode: 'normal',
             style: '',
-            text: 'Hello World 🚀',
+            text: 'This is a minimal editor with only essential formatting options',
             type: 'text',
             version: 1,
           },
@@ -73,24 +36,23 @@ const initialValue = {
   },
 } as unknown as SerializedEditorState
 
-export default function EditorDemo() {
+export default function MinimalEditor() {
   const [editorState, setEditorState] = useState<SerializedEditorState>(initialValue)
-  
-  // Define which plugins to enable (default all enabled)
-  const [pluginOptions, setPluginOptions] = useState<PluginOptions>({
+
+  // Define a minimal set of toolbar options
+  const pluginOptions: PluginOptions = {
+    // Enable only essential features
     history: true,
     autoFocus: true,
     richText: true,
-    checkList: true,
-    horizontalRule: true, 
-    table: true,
     list: true,
-    tabIndentation: true,
-    hashtag: true,
-    mentions: true,
-    draggableBlock: true,
-    images: true,
-    inlineImage: true,
+    link: true,
+    autoLink: true,
+
+    // Disable features we don't need
+    checkList: true,
+    horizontalRule: true,
+    table: true,
     excalidraw: true,
     poll: true,
     equations: true,
@@ -98,116 +60,147 @@ export default function EditorDemo() {
     figma: true,
     twitter: true,
     youtube: true,
-    codeHighlight: true,
-    markdownShortcut: true,
-    autoLink: true,
-    link: true,
-    componentPicker: true,
-    contextMenu: true,
-    dragDropPaste: true,
-    emojiPicker: true,
-    floatingLinkEditor: true,
-    floatingTextFormat: true,
-    maxIndentLevel: true,
-    beautifulMentions: true,
+    draggableBlock: true,
+
+    // Show toolbar but customize which buttons appear
     showToolbar: true,
     showBottomBar: true,
-  });
 
-  // Toggle function to enable/disable plugins
-  const togglePlugin = (pluginName: keyof PluginOptions) => {
-    setPluginOptions(prev => ({
-      ...prev,
-      [pluginName]: !prev[pluginName]
-    }));
+    // Toolbar controls - only show basic formatting
+    toolbar: {
+      history: true,
+      blockFormat: true,
+      fontFamily: true, // Hide font family dropdown
+      fontSize: true,   // Hide font size dropdown
+
+      // Only allow basic text formatting
+      fontFormat: {
+        bold: true,
+        italic: true,
+        underline: true,     // Hide underline button
+        strikethrough: true  // Hide strikethrough button
+      },
+
+      // Disable these buttons
+      subSuper: true,
+      clearFormatting: true,
+      fontColor: true,
+      fontBackground: true,
+      elementFormat: true,
+
+      // Only allow inserting basic elements
+      blockInsert: {
+        horizontalRule: true,
+        pageBreak: true,
+        image: true,          // Allow images
+        inlineImage: true,
+        collapsible: true,
+        excalidraw: true,
+        table: true,
+        poll: true,
+        columnsLayout: true,
+        embeds: true
+      }
+    },
+
+    // Minimal bottom bar
+    actionBar: {
+      maxLength: true,
+      characterLimit: true,
+      counter: true,
+      speechToText: true,
+      shareContent: true,
+      markdownToggle: true,
+      editModeToggle: true,
+      clearEditor: true,
+      treeView: true
+    }
   };
-  
+
+  // Custom image upload handler
+  const handleImageUpload = async (file: File) => {
+    console.log(`Uploading image: ${file.name}`);
+
+    // Demo implementation
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          url: URL.createObjectURL(file)
+        });
+      }, 1000);
+    });
+  };
+
+  // Handle AI text generation
+  const handleAIGeneration = async (prompt: string, transformType: string) => {
+    console.log(`AI Generation request: ${transformType}, prompt: ${prompt}`);
+
+    // Example implementation - replace with your actual API call
+    try {
+      const response = await axios.post(
+        'https://staging-api.bootcampshub.ai/api/organization/integration/generate-text',
+        { prompt },
+        {
+          headers: {
+            'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NGVmNjc2NjY5ZWFmNjM3MGMxMTQyOWMiLCJlbWFpbCI6IjE4Nm1kc2hpbXVsQGdtYWlsLmNvbSIsImJyYW5jaCI6IjY0ZmNiNGU4OTQ0Y2YyMTVkOGQzMmY5NSIsIm9yZ2FuaXphdGlvbiI6IjY0ZmNiMmU2MGQyZjg3N2FhY2NiM2IyNiIsInNvdXJjZSI6ImJyYW5jaCIsImZpcnN0TmFtZSI6IkFzaHJhZnVsIiwibGFzdE5hbWUiOiJJc2xhbSIsInByb2ZpbGVQaWN0dXJlIjoiaHR0cHM6Ly90czR1cG9ydGFsLWFsbC1maWxlcy11cGxvYWQubnljMy5kaWdpdGFsb2NlYW5zcGFjZXMuY29tLzE3MTkzODA2Nzg2MTEtU2NyZWVuc2hvdC0yMDI0IiwiaWF0IjoxNzQ0MDU1MzI4LCJleHAiOjE3NDQ2NjAxMjh9.8T76uwuBuKr_qOCnKAe0b-npvE44RxlvlIbkSVKYxRI',
+            'branch': '64fcb4e8944cf215d8d32f95'
+          }
+        }
+      )
+
+      const data = await response.data;
+
+      if (data.success) {
+        return { text: data.text, success: true };
+      } else {
+        console.error('AI generation failed:', data.error);
+        return { text: '', success: false, error: data.error };
+      }
+    } catch (error) {
+      console.error('Error calling AI generation API:', error);
+      return { text: '', success: false, error: 'Failed to connect to AI service' };
+    }
+  };
+
   // Custom mention search handler
   const handleMentionSearch = async (trigger: string, query?: string | null) => {
     console.log(`Searching for mentions with trigger: ${trigger}, query: ${query}`);
-    
+
     // You can customize this to fetch from your own API
 
-    
-   const searchQuery = query || '';
+
+    const searchQuery = query || '';
     const response = await fetch(
       `https://jsonplaceholder.typicode.com/users?trigger=${trigger}&query=${searchQuery}`
     );
     const data = await response.json();
 
-    return data?.map((x: { name: string; id: string | number }) => ({
+    return data?.map((x: { name: string; id: string | number, avatar:string }) => ({
       value: x?.name,
-      id: x?.id
+      id: x?.id,
+      avatar: x?.avatar||`https://placehold.co/400`,
     }));
-  };
-  
-  // Custom image upload handler
-  const handleImageUpload = async (file: File) => {
-    console.log(`Uploading image: ${file.name}`);
-    
-    // Here you would typically:
-    // 1. Create a FormData object
-    // 2. Append the file
-    // 3. Send to your server/CDN
-    // 4. Return the URL
-    
-    // For demo purposes, we'll create a fake delay and return a placeholder URL
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        // Return a mock URL - in a real implementation, this would be the URL returned by your server
-        resolve({ 
-          url: URL.createObjectURL(file) 
-          // In production, this would be something like:
-          // url: 'https://your-cdn.com/images/uploaded-image-123.jpg'
-        });
-      }, 1000);
-    });
-
-    //return error
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        reject(new Error('Image upload failed dfhfgh'));
-      }, 1000);
-    });
   };
 
   return (
     <div className="flex flex-col h-screen">
-      {/* <div className="p-4 bg-gray-100 border-b">
-        <h1 className="text-xl font-bold mb-2">Plugin Controls</h1>
-        <div className="grid grid-cols-4 gap-2">
-          {Object.keys(pluginOptions).map((plugin) => (
-            <label key={plugin} className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                checked={pluginOptions[plugin as keyof PluginOptions]}
-                onChange={() => togglePlugin(plugin as keyof PluginOptions)}
-                className="rounded"
-              />
-              <span>{plugin}</span>
-            </label>
-          ))}
-        </div>
-      </div> */}
-      
       <div className="flex-1">
         <Editor
           onChange={(value) => {
-            // console.log(value);
+            // Handle changes
           }}
           height="100%"
           editorSerializedState={editorState}
           onSerializedChange={(value) => setEditorState(value)}
           pluginOptions={pluginOptions}
-          showBottomBar={pluginOptions.showBottomBar}
-          maxLength={50000}
+          maxLength={5000}
           onImageUpload={handleImageUpload}
+          onAIGeneration={handleAIGeneration}
           onMentionSearch={handleMentionSearch}
-          
+          mentionMenu={MentionMenu}
+          mentionMenuItem={MentionMenuItem}
         />
       </div>
     </div>
   )
 }
-
-export const dynamic = 'force-dynamic'; // or whatever setting you need

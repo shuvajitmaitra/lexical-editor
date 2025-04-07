@@ -15,8 +15,10 @@ import { TooltipProvider } from '../ui/tooltip'
 import { nodes } from './nodes'
 import { Plugins } from './plugins'
 
-// Define plugin options interface for type safety
+// In editor.ts or editor.tsx file
+
 export interface PluginOptions {
+  // Main plugin options
   history?: boolean;
   autoFocus?: boolean;
   richText?: boolean;
@@ -51,6 +53,55 @@ export interface PluginOptions {
   beautifulMentions?: boolean;
   showToolbar?: boolean;
   showBottomBar?: boolean;
+  
+  // Toolbar-specific options
+  toolbar?: {
+    history?: boolean;
+    blockFormat?: boolean;
+    codeLanguage?: boolean;
+    fontFamily?: boolean;
+    fontSize?: boolean;
+    fontFormat?: {
+      bold?: boolean;
+      italic?: boolean;
+      underline?: boolean;
+      strikethrough?: boolean;
+    };
+    subSuper?: boolean;
+    link?: boolean;
+    clearFormatting?: boolean;
+    fontColor?: boolean;
+    fontBackground?: boolean;
+    elementFormat?: boolean;
+    blockInsert?: {
+      horizontalRule?: boolean;
+      pageBreak?: boolean;
+      image?: boolean;
+      inlineImage?: boolean;
+      collapsible?: boolean;
+      excalidraw?: boolean;
+      table?: boolean;
+      poll?: boolean;
+      columnsLayout?: boolean;
+      embeds?: boolean;
+    };
+    
+  };
+  
+  // Action bar specific options
+  actionBar?: {
+    maxLength?: boolean;
+    characterLimit?: boolean;
+    counter?: boolean;
+    speechToText?: boolean;
+    shareContent?: boolean;
+    markdownToggle?: boolean;
+    editModeToggle?: boolean;
+    clearEditor?: boolean;
+    treeView?: boolean;
+  };
+  
+  [key: string]: any; // To allow for future extensions
 }
 
 const editorConfig: InitialConfigType = {
@@ -70,9 +121,11 @@ export function Editor({
   pluginOptions = {}, // Add the pluginOptions prop with empty default
   maxLength = 5000,
   height = '70vh',
-  showBottomBar = true,
   onMentionSearch,
   onImageUpload,
+  onAIGeneration,
+  mentionMenu,
+  mentionMenuItem,
 }: {
   editorState?: EditorState
   editorSerializedState?: SerializedEditorState
@@ -84,6 +137,9 @@ export function Editor({
   showBottomBar?: boolean
   onMentionSearch?: (trigger: string, query?: string | null) => Promise<any[]>
   onImageUpload?: (file: File) => Promise<any | { url: string }>
+  onAIGeneration?: (prompt: string, transformType: string) => Promise<{ text: string, success: boolean, error?: string }>
+  mentionMenu?: React.FC<any>
+  mentionMenuItem?: React.FC<any>
 }) {
   return (
     <div 
@@ -105,10 +161,12 @@ export function Editor({
               <div className="flex flex-col h-full">
                 <Plugins
                   maxLength={maxLength}
-                  showBottomBar={showBottomBar}
                   pluginOptions={pluginOptions}
                   onMentionSearch={onMentionSearch}
                   onImageUpload={onImageUpload}
+                  onAIGeneration={onAIGeneration}
+                  mentionMenu={mentionMenu}
+                  mentionMenuItem={mentionMenuItem}
                 />
               </div>
 

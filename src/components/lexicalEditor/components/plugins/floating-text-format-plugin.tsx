@@ -44,7 +44,7 @@ import {
   PenTool,
   Languages,
   Edit,
-  BookOpen,
+  Loader2,
 } from 'lucide-react'
 import { createPortal } from 'react-dom'
 
@@ -69,9 +69,112 @@ import { getSelectedNode } from '../utils/get-selected-node'
 import { setFloatingElemPosition } from '../utils/set-floating-elem-position'
 import { Button } from '../../ui/button'
 
+// Loading indicator component
+function AILoadingIndicator({ visible }: { visible: boolean }): JSX.Element | null {
+  if (!visible) return null;
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black/10 z-50">
+      <div className="bg-white rounded-md p-4 shadow-lg flex items-center gap-2">
+        <Loader2 className="h-5 w-5 animate-spin text-primary" />
+        <span>Generating text with AI...</span>
+      </div>
+    </div>
+  );
+}
+
+// New command type for AI text transformations
+type AITextTransformPayload = {
+  transformType: string;
+  editorRef: React.MutableRefObject<LexicalEditor | null>;
+};
+
 // New command for AI text transformations
-const AI_TEXT_TRANSFORM_COMMAND: LexicalCommand<string> = 
+const AI_TEXT_TRANSFORM_COMMAND: LexicalCommand<AITextTransformPayload> =
   createCommand('AI_TEXT_TRANSFORM_COMMAND');
+
+// Helper function to process AI transformation asynchronously
+async function processAITransformation(
+  payload: AITextTransformPayload,
+  selectedText: string,
+  setIsAILoading: (loading: boolean) => void,
+  onAIGeneration?: (prompt: string, transformType: string) => Promise<{ text: string, success: boolean, error?: string }>
+) {
+  const { transformType, editorRef } = payload;
+
+  // Create appropriate prompt based on transformation type
+  let prompt = '';
+
+  if (transformType.startsWith('translate-')) {
+    const language = transformType.split('-')[1];
+    prompt = `Translate the following text to ${language}: "${selectedText}"`;
+  } else if (transformType.startsWith('custom:')) {
+    prompt = transformType.substring(7);
+  } else if (transformType.startsWith('tone-')) {
+    const tone = transformType.split('-')[1];
+    prompt = `Rewrite the following text in a ${tone} tone: "${selectedText}"`;
+  } else if (transformType.startsWith('style-')) {
+    const style = transformType.split('-')[1];
+    prompt = `Rewrite the following text in ${style} style: "${selectedText}"`;
+  } else {
+    // Handle other transformations
+    switch (transformType) {
+      case 'improve':
+        prompt = `Improve the writing of the following text while maintaining its meaning: "${selectedText}"`;
+        break;
+      case 'shorter':
+        prompt = `Make the following text shorter and more concise while preserving its key points: "${selectedText}"`;
+        break;
+      case 'longer':
+        prompt = `Expand and elaborate on the following text: "${selectedText}"`;
+        break;
+      case 'summarize':
+        prompt = `Summarize the following text: "${selectedText}"`;
+        break;
+      case 'continue':
+        prompt = `Continue writing from the following text with that text included: ${selectedText}`;
+        break;
+      default:
+        prompt = `Transform the following text: "${selectedText}"`;
+    }
+  }
+
+  try {
+    let generatedText = '';
+
+    // Use the provided AI generation handler if available
+    if (onAIGeneration) {
+      const result = await onAIGeneration(prompt, transformType);
+
+      if (result.success) {
+        generatedText = result.text;
+      } else {
+        console.error('AI generation failed:', result.error);
+        return;
+      }
+    } 
+
+    if(!generatedText) {
+      console.error('No generated text received from AI generation.');
+      return;
+    }
+
+    // Update the editor inside an update transaction
+    if (editorRef.current && generatedText) {
+      editorRef.current.update(() => {
+        const selection = $getSelection();
+        if (!$isRangeSelection(selection)) return;
+
+        // Replace the selected text with the AI-generated text
+        selection.insertText(generatedText);
+      });
+    }
+  } catch (error) {
+    console.error('Error processing AI text generation:', error);
+  } finally {
+    setIsAILoading(false);
+  }
+}
 
 function FloatingTextFormat({
   editor,
@@ -85,6 +188,9 @@ function FloatingTextFormat({
   isSubscript,
   isSuperscript,
   setIsLinkEditMode,
+  editorRef,
+  setIsAILoading,
+  onAIGeneration,
 }: {
   editor: LexicalEditor
   anchorElem: HTMLElement
@@ -97,6 +203,9 @@ function FloatingTextFormat({
   isSuperscript: boolean
   isUnderline: boolean
   setIsLinkEditMode: Dispatch<boolean>
+  editorRef: React.MutableRefObject<LexicalEditor | null>
+  setIsAILoading: Dispatch<boolean>
+  onAIGeneration?: (prompt: string, transformType: string) => Promise<{ text: string, success: boolean, error?: string }>
 }): JSX.Element {
   const popupCharStylesEditorRef = useRef<HTMLDivElement | null>(null)
 
@@ -112,8 +221,12 @@ function FloatingTextFormat({
 
   // AI text transformation function
   const transformText = useCallback((transformType: string) => {
-    editor.dispatchCommand(AI_TEXT_TRANSFORM_COMMAND, transformType)
-  }, [editor])
+    setIsAILoading(true) // Show loading indicator
+    editor.dispatchCommand(AI_TEXT_TRANSFORM_COMMAND, {
+      transformType,
+      editorRef,
+    })
+  }, [editor, setIsAILoading, editorRef])
 
   function mouseMoveListener(e: MouseEvent) {
     if (
@@ -305,9 +418,9 @@ function FloatingTextFormat({
                   </DropdownMenuItem>
                 </DropdownMenuSubContent>
               </DropdownMenuSub>
-              
+
               <DropdownMenuSeparator />
-              
+
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>
                   <Languages className="mr-2 h-4 w-4" />
@@ -346,21 +459,21 @@ function FloatingTextFormat({
                   </DropdownMenuItem>
                 </DropdownMenuSubContent>
               </DropdownMenuSub>
-              
+
               <DropdownMenuItem onClick={() => {
-                // Get selected text
-                const selection = editor.getEditorState().read(() => {
+                // Get selected text within an editor transaction
+                editor.update(() => {
                   const selection = $getSelection();
-                  return selection?.getTextContent() || '';
+                  if (!$isRangeSelection(selection)) return;
+
+                  const selectedText = selection.getTextContent();
+                  // Display custom prompt modal
+                  const customPrompt = window.prompt('Custom AI instruction:', `Transform the following text: "${selectedText}"`);
+
+                  if (customPrompt) {
+                    transformText(`custom:${customPrompt}`);
+                  }
                 });
-                
-                // Display custom prompt modal
-                // This is a placeholder - you would implement a modal dialog here
-                const customPrompt = window.prompt('Custom AI instruction:', `Transform the following text: "${selection}"`);
-                
-                if (customPrompt) {
-                  transformText(`custom:${customPrompt}`);
-                }
               }}>
                 <Edit className="mr-2 h-4 w-4" />
                 <span>Custom instruction</span>
@@ -477,7 +590,10 @@ function FloatingTextFormat({
 function useFloatingTextFormatToolbar(
   editor: LexicalEditor,
   anchorElem: HTMLDivElement | null,
-  setIsLinkEditMode: Dispatch<boolean>
+  setIsLinkEditMode: Dispatch<boolean>,
+  editorRef: React.MutableRefObject<LexicalEditor | null>,
+  setIsAILoading: Dispatch<boolean>,
+  onAIGeneration?: (prompt: string, transformType: string) => Promise<{ text: string, success: boolean, error?: string }>
 ): JSX.Element | null {
   const [isText, setIsText] = useState(false)
   const [isLink, setIsLink] = useState(false)
@@ -569,40 +685,39 @@ function useFloatingTextFormatToolbar(
       // Register AI transformation command handler
       editor.registerCommand(
         AI_TEXT_TRANSFORM_COMMAND,
-        (transformType) => {
-          const selection = $getSelection()
-          
-          if (!$isRangeSelection(selection)) {
-            return false
+        (payload) => {
+          const { transformType } = payload;
+
+          // First, capture the selected text in a safe transaction
+          let selectedText = '';
+          let wasSelected = false;
+
+          // Capture the selection within a read transaction
+          editor.getEditorState().read(() => {
+            const selection = $getSelection();
+
+            if ($isRangeSelection(selection)) {
+              selectedText = selection.getTextContent();
+              wasSelected = !selection.isCollapsed();
+            }
+          });
+
+          // If no text was selected, we can't transform anything
+          if (!wasSelected || !selectedText.trim()) {
+            setIsAILoading(false);
+            return false;
           }
-          
-          const selectedText = selection.getTextContent()
-          console.log(`AI Transform: ${transformType} on "${selectedText}"`)
-          
-          // Handle different transformation types
-          if (transformType.startsWith('translate-')) {
-            const language = transformType.split('-')[1];
-            console.log(`Translating to ${language}...`);
-            // Call translation API here
-          } else if (transformType.startsWith('custom:')) {
-            const customPrompt = transformType.substring(7);
-            console.log(`Custom AI instruction: ${customPrompt}`);
-            // Call AI API with custom prompt here
-          } else {
-            // Handle other transformations (improve, shorter, longer, etc.)
-            console.log(`Applying transformation: ${transformType}`);
-          }
-          
-          // Here you would implement the actual API call to AI service
-          // This is a placeholder for the actual implementation
-          // You would typically send the text to an API and replace the selection with the result
-          
-          return true
+
+          // Process the transformation asynchronously
+          processAITransformation(payload, selectedText, setIsAILoading, onAIGeneration);
+
+          // Return true to indicate the command was handled
+          return true;
         },
         COMMAND_PRIORITY_LOW
       )
     )
-  }, [editor, updatePopup])
+  }, [editor, updatePopup, setIsAILoading, onAIGeneration])
 
   if (!isText || !anchorElem) {
     return null
@@ -621,6 +736,9 @@ function useFloatingTextFormatToolbar(
       isUnderline={isUnderline}
       isCode={isCode}
       setIsLinkEditMode={setIsLinkEditMode}
+      editorRef={editorRef}
+      setIsAILoading={setIsAILoading}
+      onAIGeneration={onAIGeneration}
     />,
     anchorElem
   )
@@ -628,11 +746,32 @@ function useFloatingTextFormatToolbar(
 
 export function FloatingTextFormatToolbarPlugin({
   anchorElem,
+  onAIGeneration,
 }: {
-  anchorElem: HTMLDivElement | null
+  anchorElem: HTMLDivElement | null,
+  onAIGeneration?: (prompt: string, transformType: string) => Promise<{ text: string, success: boolean, error?: string }>
 }): JSX.Element | null {
   const [editor] = useLexicalComposerContext()
   const { setIsLinkEditMode } = useFloatingLinkContext()
+  const editorRef = useRef<LexicalEditor | null>(editor);
+  const [isAILoading, setIsAILoading] = useState(false);
 
-  return useFloatingTextFormatToolbar(editor, anchorElem, setIsLinkEditMode)
+  // Keep the ref updated
+  useEffect(() => {
+    editorRef.current = editor;
+  }, [editor]);
+
+  return (
+    <>
+      {useFloatingTextFormatToolbar(
+        editor,
+        anchorElem,
+        setIsLinkEditMode,
+        editorRef,
+        setIsAILoading,
+        onAIGeneration
+      )}
+      <AILoadingIndicator visible={isAILoading} />
+    </>
+  );
 }

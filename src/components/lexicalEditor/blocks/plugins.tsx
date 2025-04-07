@@ -127,23 +127,28 @@ import { IMAGE } from '../components/transformers/markdown-image-transformer'
 import { TABLE } from '../components/transformers/markdown-table-transformer'
 import { TWEET } from '../components/transformers/markdown-tweet-transformer'
 
-
 import { BeautifulMentionsPlugin } from "../components/plugins/beautiful-mention";
-import { Menu, MenuItem } from "../components/editor-ui/MentionMenu"
+
+import { PluginOptions } from './editor'
 export const placeholder = 'Press / for commands...'
 
 export function Plugins({ 
   maxLength, 
-  showBottomBar,
   pluginOptions = {},
   onMentionSearch,
-  onImageUpload
+  onImageUpload,
+  onAIGeneration,
+  mentionMenu,
+  mentionMenuItem,
 }: { 
   maxLength?: number, 
-  showBottomBar?: boolean,
-  pluginOptions?: any,
+  pluginOptions?: PluginOptions,
   onMentionSearch?: (trigger: string, query?: string | null) => Promise<any[]>,
   onImageUpload?: (file: File) => Promise<any | { url: string }>
+  onAIGeneration?: (prompt: string, transformType: string) => Promise<{ text: string, success: boolean, error?: string }>
+  mentionMenu?: React.ComponentType<any>,
+  mentionMenuItem?: React.ComponentType<any>
+
 }) {
   const [floatingAnchorElem, setFloatingAnchorElem] =
     useState<HTMLDivElement | null>(null)
@@ -159,18 +164,28 @@ export function Plugins({
     if (onMentionSearch) {
       return onMentionSearch(trigger, queryString);
     }
-    
-    // // Default implementation as fallback
-    // const query = queryString || '';
-    // const response = await fetch(
-    //   `https://jsonplaceholder.typicode.com/users?trigger=${trigger}&query=${query}`
-    // );
-    // const data = await response.json();
+  };
 
-    // return data?.map((x: { name: string; id: string | number }) => ({
-    //   value: x?.name,
-    //   id: x?.id
-    // }));
+// Option 1: Use type assertion with 'as any'
+const isToolbarOptionEnabled = (option: string, subOption?: string, subSubOption?: string): boolean => {
+  if (!pluginOptions.toolbar) return true; // If toolbar options not specified, default to enabled
+  
+  if (subSubOption && subOption) {
+    // Handle deeply nested options like toolbar.blockInsert.horizontalRule
+    return (pluginOptions.toolbar as any)[option]?.[subOption]?.[subSubOption] !== false;
+  } else if (subOption) {
+    // Handle nested options like toolbar.fontFormat.bold
+    return (pluginOptions.toolbar as any)[option]?.[subOption] !== false;
+  } else {
+    // Handle top-level options like toolbar.history
+    return (pluginOptions.toolbar as any)[option] !== false;
+  }
+};
+
+  // Helper function to check if an action bar option is enabled
+  const isActionBarOptionEnabled = (option: string): boolean => {
+    if (!pluginOptions.actionBar) return true; // If actionBar options not specified, default to enabled
+    return (pluginOptions.actionBar as any)[option] !== false;
   };
 
   return (
@@ -179,50 +194,53 @@ export function Plugins({
         <ToolbarPlugin>
           {({ blockType }) => (
             <div className="vertical-align-middle sticky top-0 z-10 flex gap-2 overflow-auto border-b p-1">
-              {pluginOptions.history !== false && <HistoryToolbarPlugin />}
+              {pluginOptions.history !== false && isToolbarOptionEnabled('history') && <HistoryToolbarPlugin />}
               <Separator orientation="vertical" className="h-8" />
-              <BlockFormatDropDown>
-                <FormatParagraph />
-                <FormatHeading levels={['h1', 'h2', 'h3']} />
-                <FormatNumberedList />
-                <FormatBulletedList />
-                <FormatCheckList />
-                <FormatCodeBlock />
-                <FormatQuote />
-              </BlockFormatDropDown>
+              {isToolbarOptionEnabled('blockFormat') && (
+                <BlockFormatDropDown>
+                  <FormatParagraph />
+                  <FormatHeading levels={['h1', 'h2', 'h3']} />
+                  <FormatNumberedList />
+                  <FormatBulletedList />
+                  <FormatCheckList />
+                  <FormatCodeBlock />
+                  <FormatQuote />
+                </BlockFormatDropDown>
+              )}
               {blockType === 'code' ? (
-                <CodeLanguageToolbarPlugin />
+                isToolbarOptionEnabled('codeLanguage') && <CodeLanguageToolbarPlugin />
               ) : (
                 <>
-                  <FontFamilyToolbarPlugin />
-                  <FontSizeToolbarPlugin />
+                  {isToolbarOptionEnabled('fontFamily') && <FontFamilyToolbarPlugin />}
+                  {isToolbarOptionEnabled('fontSize') && <FontSizeToolbarPlugin />}
                   <Separator orientation="vertical" className="h-8" />
-                  <FontFormatToolbarPlugin format="bold" />
-                  <FontFormatToolbarPlugin format="italic" />
-                  <FontFormatToolbarPlugin format="underline" />
-                  <FontFormatToolbarPlugin format="strikethrough" />
+                  {isToolbarOptionEnabled('fontFormat', 'bold') && <FontFormatToolbarPlugin format="bold" />}
+                  {isToolbarOptionEnabled('fontFormat', 'italic') && <FontFormatToolbarPlugin format="italic" />}
+                  {isToolbarOptionEnabled('fontFormat', 'underline') && <FontFormatToolbarPlugin format="underline" />}
+                  {isToolbarOptionEnabled('fontFormat', 'strikethrough') && <FontFormatToolbarPlugin format="strikethrough" />}
+                  
                   <Separator orientation="vertical" className="h-8" />
-                  <SubSuperToolbarPlugin />
-                  <LinkToolbarPlugin />
+                  {isToolbarOptionEnabled('subSuper') && <SubSuperToolbarPlugin />}
+                  {isToolbarOptionEnabled('link') && <LinkToolbarPlugin />}
                   <Separator orientation="vertical" className="h-8" />
-                  <ClearFormattingToolbarPlugin />
+                  {isToolbarOptionEnabled('clearFormatting') && <ClearFormattingToolbarPlugin />}
                   <Separator orientation="vertical" className="h-8" />
-                  <FontColorToolbarPlugin />
-                  <FontBackgroundToolbarPlugin />
+                  {isToolbarOptionEnabled('fontColor') && <FontColorToolbarPlugin />}
+                  {isToolbarOptionEnabled('fontBackground') && <FontBackgroundToolbarPlugin />}
                   <Separator orientation="vertical" className="h-8" />
-                  <ElementFormatToolbarPlugin />
+                  {isToolbarOptionEnabled('elementFormat') && <ElementFormatToolbarPlugin />}
                   <Separator orientation="vertical" className="h-8" />
                   <BlockInsertPlugin>
-                    {pluginOptions.horizontalRule !== false && <InsertHorizontalRule />}
-                    <InsertPageBreak />
-                    {pluginOptions.images !== false && <InsertImage  onImageUpload={onImageUpload as any}  />}
-                    {pluginOptions.inlineImage !== false && <InsertInlineImage onImageUpload={onImageUpload as any} />}
-                    <InsertCollapsibleContainer />
-                    {pluginOptions.excalidraw !== false && <InsertExcalidraw />}
-                    {pluginOptions.table !== false && <InsertTable />}
-                    {pluginOptions.poll !== false && <InsertPoll />}
-                    <InsertColumnsLayout />
-                    <InsertEmbeds />
+                    {pluginOptions.horizontalRule !== false && isToolbarOptionEnabled('blockInsert', 'horizontalRule') && <InsertHorizontalRule />}
+                    {isToolbarOptionEnabled('blockInsert', 'pageBreak') && <InsertPageBreak />}
+                    {pluginOptions.images !== false && isToolbarOptionEnabled('blockInsert', 'image') && <InsertImage onImageUpload={onImageUpload as any} />}
+                    {pluginOptions.inlineImage !== false && isToolbarOptionEnabled('blockInsert', 'inlineImage') && <InsertInlineImage onImageUpload={onImageUpload as any} />}
+                    {isToolbarOptionEnabled('blockInsert', 'collapsible') && <InsertCollapsibleContainer />}
+                    {pluginOptions.excalidraw !== false && isToolbarOptionEnabled('blockInsert', 'excalidraw') && <InsertExcalidraw />}
+                    {pluginOptions.table !== false && isToolbarOptionEnabled('blockInsert', 'table') && <InsertTable />}
+                    {pluginOptions.poll !== false && isToolbarOptionEnabled('blockInsert', 'poll') && <InsertPoll />}
+                    {isToolbarOptionEnabled('blockInsert', 'columnsLayout') && <InsertColumnsLayout />}
+                    {isToolbarOptionEnabled('blockInsert', 'embeds') && <InsertEmbeds />}
                   </BlockInsertPlugin>
                 </>
               )}
@@ -236,14 +254,13 @@ export function Plugins({
           <BeautifulMentionsPlugin
             triggers={["@"]}
             onSearch={queryMentions as any}
-            menuComponent={Menu}
-            menuItemComponent={MenuItem}
+            menuComponent={mentionMenu}
+            menuItemComponent={mentionMenuItem}
             allowSpaces
             autoSpace
           />
         )}
         
-        {/* {pluginOptions.mentions !== false && <MentionsPlugin />} */}
         {pluginOptions.autoFocus !== false && <AutoFocusPlugin />}
         
         {pluginOptions.richText !== false && (
@@ -275,12 +292,8 @@ export function Plugins({
         {pluginOptions.draggableBlock !== false && <DraggableBlockPlugin anchorElem={floatingAnchorElem} />}
         <KeywordsPlugin />
         <EmojisPlugin />
-        {pluginOptions.images !== false && <ImagesPlugin 
-         
-        />}
-        {pluginOptions.inlineImage !== false && <InlineImagePlugin 
-          
-        />}
+        {pluginOptions.images !== false && <ImagesPlugin />}
+        {pluginOptions.inlineImage !== false && <InlineImagePlugin />}
         {pluginOptions.excalidraw !== false && <ExcalidrawPlugin />}
         
         {pluginOptions.table !== false && (
@@ -365,46 +378,50 @@ export function Plugins({
         {pluginOptions.emojiPicker !== false && <EmojiPickerPlugin />}
 
         {pluginOptions.floatingLinkEditor !== false && <FloatingLinkEditorPlugin anchorElem={floatingAnchorElem} />}
-        {pluginOptions.floatingTextFormat !== false && <FloatingTextFormatToolbarPlugin anchorElem={floatingAnchorElem} />}
+        {pluginOptions.floatingTextFormat !== false && <FloatingTextFormatToolbarPlugin anchorElem={floatingAnchorElem} onAIGeneration={onAIGeneration} />}
 
         {pluginOptions.maxIndentLevel !== false && <ListMaxIndentLevelPlugin />}
       </div>
       
-      {showBottomBar && (
+      {pluginOptions.showBottomBar && (
         <ActionsPlugin>
           <div className="clear-both flex items-center justify-between border-t p-1 overflow-auto gap-2">
             <div className='flex justify-start flex-1'>
-              <MaxLengthPlugin maxLength={maxLength as number} />
-              <CharacterLimitPlugin maxLength={maxLength as number} charset="UTF-16" />
+              {isActionBarOptionEnabled('maxLength') && <MaxLengthPlugin maxLength={maxLength as number} />}
+              {isActionBarOptionEnabled('characterLimit') && <CharacterLimitPlugin maxLength={maxLength as number} charset="UTF-16" />}
             </div>
             <div>
-              <CounterCharacterPlugin charset="UTF-16" />
+              {isActionBarOptionEnabled('counter') && <CounterCharacterPlugin charset="UTF-16" />}
             </div>
             <div className="flex justify-end flex-1">
-              <SpeechToTextPlugin />
-              <ShareContentPlugin />
-              <MarkdownTogglePlugin
-                shouldPreserveNewLinesInMarkdown={true}
-                transformers={[
-                  TABLE,
-                  HR,
-                  IMAGE,
-                  EMOJI,
-                  EQUATION,
-                  TWEET,
-                  CHECK_LIST,
-                  ...ELEMENT_TRANSFORMERS,
-                  ...MULTILINE_ELEMENT_TRANSFORMERS,
-                  ...TEXT_FORMAT_TRANSFORMERS,
-                  ...TEXT_MATCH_TRANSFORMERS,
-                ]}
-              />
-              <EditModeTogglePlugin />
-              <>
-                <ClearEditorActionPlugin />
-                <ClearEditorPlugin />
-              </>
-              <TreeViewPlugin />
+              {isActionBarOptionEnabled('speechToText') && <SpeechToTextPlugin />}
+              {isActionBarOptionEnabled('shareContent') && <ShareContentPlugin />}
+              {isActionBarOptionEnabled('markdownToggle') && (
+                <MarkdownTogglePlugin
+                  shouldPreserveNewLinesInMarkdown={true}
+                  transformers={[
+                    TABLE,
+                    HR,
+                    IMAGE,
+                    EMOJI,
+                    EQUATION,
+                    TWEET,
+                    CHECK_LIST,
+                    ...ELEMENT_TRANSFORMERS,
+                    ...MULTILINE_ELEMENT_TRANSFORMERS,
+                    ...TEXT_FORMAT_TRANSFORMERS,
+                    ...TEXT_MATCH_TRANSFORMERS,
+                  ]}
+                />
+              )}
+              {isActionBarOptionEnabled('editModeToggle') && <EditModeTogglePlugin />}
+              {isActionBarOptionEnabled('clearEditor') && (
+                <>
+                  <ClearEditorActionPlugin />
+                  <ClearEditorPlugin />
+                </>
+              )}
+              {isActionBarOptionEnabled('treeView') && <TreeViewPlugin />}
             </div>
           </div>
         </ActionsPlugin>
