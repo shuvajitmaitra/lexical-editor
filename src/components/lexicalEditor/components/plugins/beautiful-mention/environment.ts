@@ -6,7 +6,7 @@ export const CAN_USE_DOM: boolean =
 export const IS_IOS: boolean =
   CAN_USE_DOM &&
   /iPad|iPhone|iPod/.test(navigator.userAgent) &&
-  // @ts-expect-error window.MSStream
+  // // @ts-expect-error window.MSStream
   !window.MSStream;
 
 export const IS_MOBILE =

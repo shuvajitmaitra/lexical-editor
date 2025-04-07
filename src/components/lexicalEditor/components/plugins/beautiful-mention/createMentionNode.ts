@@ -1,5 +1,5 @@
 import { LexicalEditor, LexicalNodeReplacement } from "lexical";
-import { EditorConfig } from "lexical/LexicalEditor";
+import { EditorConfig } from "lexical";
 import React, { ElementType } from "react";
 import { BeautifulMentionComponentProps } from "./BeautifulMentionsPluginProps";
 import {
