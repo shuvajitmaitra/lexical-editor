@@ -6,6 +6,7 @@ import { Editor, PluginOptions } from '@/components/lexicalEditor/blocks/editor'
 import axios from 'axios'
 import { MentionMenu, MentionMenuItem } from '@/components/lexicalEditor/components/editor-ui/MentionMenu'
 // Default value for the editor
+
 const initialValue = {
   root: {
     children: [
