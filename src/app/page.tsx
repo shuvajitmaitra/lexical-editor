@@ -193,12 +193,13 @@ export default function MinimalEditor() {
           editorSerializedState={editorState}
           onSerializedChange={(value) => setEditorState(value)}
           pluginOptions={pluginOptions}
-          maxLength={5000}
+          maxLength={50000}
           onImageUpload={handleImageUpload}
           onAIGeneration={handleAIGeneration}
           onMentionSearch={handleMentionSearch}
           mentionMenu={MentionMenu}
           mentionMenuItem={MentionMenuItem}
+
         />
       </div>
     </div>
