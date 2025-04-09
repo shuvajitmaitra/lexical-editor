@@ -33,7 +33,6 @@ import { TABLE } from '../components/transformers/markdown-table-transformer'
 import { TWEET } from '../components/transformers/markdown-tweet-transformer'
 import { MENTION_MARKDOWN_TRANSFORMER } from '../components/transformers/markdown-mention-transformer'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { $transformTextToMentionNodes } from '../components/plugins/beautiful-mention'
 
 export interface PluginOptions {
   // Main plugin options
@@ -45,20 +44,9 @@ export interface PluginOptions {
   table?: boolean
   list?: boolean
   tabIndentation?: boolean
-  hashtag?: boolean
-  mentions?: boolean
   draggableBlock?: boolean
   images?: boolean
-  inlineImage?: boolean
-  excalidraw?: boolean
-  poll?: boolean
-  equations?: boolean
-  autoEmbed?: boolean
-  figma?: boolean
-  twitter?: boolean
-  youtube?: boolean
   codeHighlight?: boolean
-  markdownShortcut?: boolean
   autoLink?: boolean
   link?: boolean
   componentPicker?: boolean
@@ -77,31 +65,18 @@ export interface PluginOptions {
     history?: boolean
     blockFormat?: boolean
     codeLanguage?: boolean
-    fontFamily?: boolean
-    fontSize?: boolean
     fontFormat?: {
       bold?: boolean
       italic?: boolean
       underline?: boolean
       strikethrough?: boolean
     }
-    subSuper?: boolean
     link?: boolean
     clearFormatting?: boolean
-    fontColor?: boolean
-    fontBackground?: boolean
-    elementFormat?: boolean
     blockInsert?: {
       horizontalRule?: boolean
-      pageBreak?: boolean
       image?: boolean
-      inlineImage?: boolean
-      collapsible?: boolean
-      excalidraw?: boolean
       table?: boolean
-      poll?: boolean
-      columnsLayout?: boolean
-      embeds?: boolean
     }
   }
 
@@ -111,8 +86,6 @@ export interface PluginOptions {
     characterLimit?: boolean
     counter?: boolean
     speechToText?: boolean
-    shareContent?: boolean
-    markdownToggle?: boolean
     editModeToggle?: boolean
     clearEditor?: boolean
     treeView?: boolean
@@ -255,7 +228,7 @@ export function MarkdownEditor({
               <OnChangePlugin
                 ignoreSelectionChange={true}
                 onChange={(editorState) => {
-                  console.log(editorState.toJSON());
+               
                   
                   onChange?.(editorState)
                   onSerializedChange?.(editorState.toJSON())
@@ -264,7 +237,7 @@ export function MarkdownEditor({
                   editorState.read(() => {
                     markdown = $convertToMarkdownString(TRANSFORMERS)
                   })
-console.log(markdown);
+
 
                   onMarkdownChange?.(markdown)
                 }}

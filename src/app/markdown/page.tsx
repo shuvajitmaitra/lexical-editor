@@ -15,79 +15,60 @@ export default function MinimalEditor() {
 
   // Define a minimal set of toolbar options
   const pluginOptions: PluginOptions = {
-    // Enable only essential features
+    // Main plugin options
     history: true,
     autoFocus: true,
     richText: true,
-    list: true,
-    link: true,
-    autoLink: true,
-
-    // Disable features we don't need
     checkList: true,
     horizontalRule: true,
     table: true,
-    excalidraw: true,
-    poll: true,
-    equations: true,
-    autoEmbed: true,
-    figma: true,
-    twitter: true,
-    youtube: true,
+    list: true,
+    tabIndentation: true,
     draggableBlock: true,
-
-    // Show toolbar but customize which buttons appear
+    images: true,
+    codeHighlight: true,
+    autoLink: true,
+    link: true,
+    componentPicker: true,
+    contextMenu: true,
+    dragDropPaste: true,
+    emojiPicker: true,
+    floatingLinkEditor: true,
+    floatingTextFormat: true,
+    maxIndentLevel: true,
+    beautifulMentions: true,
     showToolbar: true,
     showBottomBar: true,
 
-    // Toolbar controls - only show basic formatting
+    // Toolbar-specific options
     toolbar: {
       history: true,
       blockFormat: true,
-      fontFamily: true,
-      fontSize: true,
-
-      // Only allow basic text formatting
+      codeLanguage: true,
       fontFormat: {
         bold: true,
         italic: true,
         underline: true,
-        strikethrough: true
+        strikethrough: true,
       },
-
-      // Disable these buttons
-      subSuper: true,
+      link: true,
       clearFormatting: true,
-      fontColor: true,
-      fontBackground: true,
-      elementFormat: true,
-
-      // Only allow inserting basic elements
       blockInsert: {
         horizontalRule: true,
-        pageBreak: true,
         image: true,
-        inlineImage: true,
-        collapsible: true,
-        excalidraw: true,
         table: true,
-        poll: true,
-        columnsLayout: true,
-        embeds: true
       }
     },
 
-    // Minimal bottom bar
+    // Action bar specific options
     actionBar: {
       maxLength: true,
       characterLimit: true,
       counter: true,
       speechToText: true,
-      shareContent: true,
-      markdownToggle: true,
       editModeToggle: true,
       clearEditor: true,
-      treeView: true
+      treeView: true,
     }
   };
 
@@ -147,10 +128,10 @@ export default function MinimalEditor() {
     );
     const data = await response.json();
 
-    return data?.map((x: { name: string; id: string | number, avatar:string }) => ({
+    return data?.map((x: { name: string; id: string | number, avatar: string }) => ({
       value: x?.name,
       id: String(x?.id),
-      avatar: x?.avatar||`https://placehold.co/400`,
+      avatar: x?.avatar || `https://placehold.co/400`,
     }));
   };
 
@@ -177,8 +158,8 @@ export default function MinimalEditor() {
           mentionMenuItem={MentionMenuItem}
         />
       </div>
-      
-     
+
+
     </div>
   )
 }
