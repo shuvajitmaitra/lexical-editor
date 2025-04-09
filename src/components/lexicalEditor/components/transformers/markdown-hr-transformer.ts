@@ -9,6 +9,8 @@ import { LexicalNode } from 'lexical'
 export const HR: ElementTransformer = {
   dependencies: [HorizontalRuleNode],
   export: (node: LexicalNode) => {
+
+  
     return $isHorizontalRuleNode(node) ? '***' : null
   },
   regExp: /^(---|\*\*\*|___)\s?$/,
