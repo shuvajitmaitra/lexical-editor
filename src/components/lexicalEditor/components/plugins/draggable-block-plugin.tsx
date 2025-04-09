@@ -2,7 +2,7 @@
 
 import { useRef, JSX } from 'react'
 
-import { DraggableBlockPlugin_EXPERIMENTAL } from '@lexical/react/LexicalDraggableBlockPlugin'
+import { DraggableBlockPlugin_EXPERIMENTAL as DraggableBlockPluginExperimental } from '@lexical/react/LexicalDraggableBlockPlugin'
 import { GripVerticalIcon } from 'lucide-react'
 
 const DRAGGABLE_BLOCK_MENU_CLASSNAME = 'draggable-block-menu'
@@ -25,7 +25,7 @@ export function DraggableBlockPlugin({
   }
 
   return (
-    <DraggableBlockPlugin_EXPERIMENTAL
+    <DraggableBlockPluginExperimental
       anchorElem={anchorElem}
       // Fix 2: Cast the refs to the expected type
       menuRef={menuRef as React.RefObject<HTMLElement>}
