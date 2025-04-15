@@ -1,0 +1,2 @@
+import{$createTextNode as e}from"lexical";import i from"../utils/emoji-list.js";var r={dependencies:[],export:function(){return null},importRegExp:/:([a-z0-9_]+):/,regExp:/:([a-z0-9_]+):/,replace:function(r,t){var n,o=t[1],l=null===(n=i.find((function(e){return e.aliases.includes(o)})))||void 0===n?void 0:n.emoji;l&&r.replace(e(l))},trigger:":",type:"text-match"};export{r as EMOJI};
+//# sourceMappingURL=markdown-emoji-transformer.js.map

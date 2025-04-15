@@ -1,0 +1,2 @@
+import{HorizontalRuleNode as e,$isHorizontalRuleNode as l,$createHorizontalRuleNode as r}from"../../../../node_modules/@lexical/react/LexicalHorizontalRuleNode.mjs.js";var t={dependencies:[e],export:function(e){return l(e)?"***":null},regExp:/^(---|\*\*\*|___)\s?$/,replace:function(e,l,t,n){var o=r();n||null!=e.getNextSibling()?e.replace(o):e.insertBefore(o),o.selectNext()},type:"element"};export{t as HR};
+//# sourceMappingURL=markdown-hr-transformer.js.map

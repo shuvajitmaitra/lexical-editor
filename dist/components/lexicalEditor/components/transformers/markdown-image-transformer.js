@@ -1,0 +1,2 @@
+import{ImageNode as e,$isImageNode as t,$createImageNode as r}from"../nodes/image-node.js";var c={dependencies:[e],export:function(e){return t(e)?"![".concat(e.getAltText(),"](").concat(e.getSrc(),")"):null},importRegExp:/!(?:\[([^[]*)\])(?:\(([^(]+)\))/,regExp:/!(?:\[([^[]*)\])(?:\(([^(]+)\))$/,replace:function(e,t){var c=t[1],n=t[2],o=r({altText:c,maxWidth:800,src:n});e.replace(o)},trigger:")",type:"text-match"};export{c as IMAGE};
+//# sourceMappingURL=markdown-image-transformer.js.map

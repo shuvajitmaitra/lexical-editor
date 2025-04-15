@@ -1,0 +1,2 @@
+import{InsertImageDialog as e}from"../images-plugin.js";import{ComponentPickerOption as o}from"./component-picker-option.js";import t from"../../../../../node_modules/lucide-react/dist/esm/icons/image.js";function n(n){return new o("Image",{icon:React.createElement(t,{className:"size-4"}),keywords:["image","photo","picture","file"],onSelect:function(o,t,i){return i("Insert Image",(function(o){return React.createElement(e,{onImageUpload:n,activeEditor:t,onClose:o})}))}})}export{n as ImagePickerPlugin};
+//# sourceMappingURL=image-picker-plugin.js.map

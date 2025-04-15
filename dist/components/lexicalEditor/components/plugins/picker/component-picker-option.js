@@ -1,0 +1,2 @@
+import{__extends as e}from"../../../../../node_modules/tslib/tslib.es6.mjs.js";import{MenuOption as o}from"../../../../../node_modules/@lexical/react/LexicalTypeaheadMenuPlugin.mjs.js";var t=function(o){function t(e,t){var r=o.call(this,e)||this;return r.title=e,r.keywords=t.keywords||[],r.icon=t.icon,r.keyboardShortcut=t.keyboardShortcut,r.onSelect=t.onSelect.bind(r),r}return e(t,o),t}(o);export{t as ComponentPickerOption};
+//# sourceMappingURL=component-picker-option.js.map

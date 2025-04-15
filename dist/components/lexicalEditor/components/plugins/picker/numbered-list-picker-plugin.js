@@ -1,0 +1,2 @@
+import{INSERT_ORDERED_LIST_COMMAND as e}from"@lexical/list";import{ComponentPickerOption as o}from"./component-picker-option.js";import t from"../../../../../node_modules/lucide-react/dist/esm/icons/list-ordered.js";function r(){return new o("Numbered List",{icon:React.createElement(t,{className:"size-4"}),keywords:["numbered list","ordered list","ol"],onSelect:function(o,t){return t.dispatchCommand(e,void 0)}})}export{r as NumberedListPickerPlugin};
+//# sourceMappingURL=numbered-list-picker-plugin.js.map

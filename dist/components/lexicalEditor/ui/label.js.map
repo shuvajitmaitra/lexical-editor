@@ -1,0 +1,1 @@
+{"version":3,"file":"label.js","sources":["../../../../../src/components/lexicalEditor/ui/label.tsx"],"sourcesContent":[null],"names":["Label","_a","className","props","__rest","React","LabelPrimitive","__assign","cn"],"mappings":"sOAOA,SAASA,EAAMC,GACb,IAAAC,EAASD,EAAAC,UACNC,EAAKC,EAAAH,EAFK,eAIb,OACEI,gBAACC,EACWC,EAAA,CAAA,YAAA,QACVL,UAAWM,EACT,sNACAN,IAEEC,GAGV"}

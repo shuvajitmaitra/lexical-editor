@@ -1,0 +1,1 @@
+{"version":3,"file":"collapsible.js","sources":["../../../../../../src/components/lexicalEditor/components/utils/collapsible.ts"],"sourcesContent":[null],"names":["setDomHiddenUntilFound","dom","hidden","domOnBeforeMatch","callback","onbeforematch"],"mappings":"AAAM,SAAUA,EAAuBC,GAErCA,EAAIC,OAAS,aACf,CAEgB,SAAAC,EAAiBF,EAAkBG,GAEjDH,EAAII,cAAgBD,CACtB"}
