@@ -7,6 +7,7 @@ import axios from 'axios'
 import { MentionMenu, MentionMenuItem } from '@/components/lexicalEditor/components/editor-ui/MentionMenu'
 // Default value for the editor
 
+
 const initialValue = {
   root: {
     children: [
@@ -186,11 +187,11 @@ export default function MinimalEditor() {
   type window ={
     ReactNativeWebView: any
   }
-  const handleChangeRn = (value) => {
+  const handleChangeRn = (value:SerializedEditorState) => {
          // or .toString(), .getHTML()
-    window.ReactNativeWebView?.postMessage(
-      JSON.stringify({ type: 'DOC_CHANGE', payload: value })
-    );
+         (window as any).ReactNativeWebView?.postMessage(
+          JSON.stringify({ type: 'DOC_CHANGE', payload: value })
+        );
   };
   return (
     <div className="flex flex-col h-screen">
