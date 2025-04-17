@@ -14,6 +14,7 @@ import { TooltipProvider } from '../ui/tooltip'
 
 import { nodes } from './nodes'
 import { Plugins } from './plugins'
+import EditorMethods from '../components/shared/EditorMethods'
 
 // In editor.ts or editor.tsx file
 
@@ -53,7 +54,7 @@ export interface PluginOptions {
   beautifulMentions?: boolean;
   showToolbar?: boolean;
   showBottomBar?: boolean;
-  
+
   // Toolbar-specific options
   toolbar?: {
     history?: boolean;
@@ -85,9 +86,9 @@ export interface PluginOptions {
       columnsLayout?: boolean;
       embeds?: boolean;
     };
-    
+
   };
-  
+
   // Action bar specific options
   actionBar?: {
     maxLength?: boolean;
@@ -100,7 +101,7 @@ export interface PluginOptions {
     clearEditor?: boolean;
     treeView?: boolean;
   };
-  
+
   [key: string]: any; // To allow for future extensions
 }
 
@@ -142,7 +143,7 @@ export function Editor({
   mentionMenuItem?: React.FC<any>
 }) {
   return (
-    <div 
+    <div
       className="overflow-hidden rounded-lg border bg-background shadow flex flex-col"
       style={{ height }}
     >
@@ -156,6 +157,9 @@ export function Editor({
         }}
       >
         <TooltipProvider>
+          <EditorMethods
+            serializedEditorState={editorSerializedState}
+          />
           <SharedAutocompleteContext>
             <FloatingLinkContext>
               <div className="flex flex-col h-full">

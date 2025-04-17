@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { SerializedEditorState } from 'lexical'
 import { Editor, PluginOptions } from '@/components/lexicalEditor/blocks/editor'
 import axios from 'axios'
@@ -18,7 +18,7 @@ const initialValue = {
             format: 0,
             mode: 'normal',
             style: '',
-            text: 'Hello, welcome to the powerful editor!',
+            text: 'Hello, welcome to the editor!',
             type: 'text',
             version: 1,
           },
@@ -177,25 +177,61 @@ export default function MinimalEditor() {
     );
     const data = await response.json();
 
-    return data?.map((x: { name: string; id: string | number, avatar:string }) => ({
+    return data?.map((x: { name: string; id: string | number, avatar: string }) => ({
       value: x?.name,
       id: x?.id,
-      avatar: x?.avatar||`https://placehold.co/400`,
+      avatar: x?.avatar || `https://placehold.co/400`,
     }));
   };
 
-  type window ={
-    ReactNativeWebView: any
-  }
-  const handleChangeRn = (value:SerializedEditorState) => {
-         // or .toString(), .getHTML()
 
-         console.log('Serialized editor state:', value);
-         
-         (window as any).ReactNativeWebView?.postMessage(
-          JSON.stringify({ type: 'DOC_CHANGE', payload: value })
-        );
+  const handleChangeRn = (value: SerializedEditorState) => {
+    // or .toString(), .getHTML()
+
+    console.log('Serialized editor state:', value);
+
+    (window as any).ReactNativeWebView?.postMessage(
+      JSON.stringify({ type: 'DOC_CHANGE', payload: value })
+    );
   };
+
+
+  useEffect(() => {
+    function handleNativeMessage(e: MessageEvent<string>) {
+      try {
+        const msg = JSON.parse(e.data) as any;
+
+        switch (msg.type) {
+          case 'SET_CONTENT':
+            // update your editor state here
+            console.log('New doc content →', msg.payload);
+
+
+            // ste editor state parse if it is string
+            if (typeof msg.payload === 'string') {
+              setEditorState(JSON.parse(msg.payload))
+            } else {
+              setEditorState(msg.payload)
+            }
+            
+            break;
+
+          case 'FOCUS_EDITOR':
+            // e.g. editorRef.current?.focus();
+            break;
+
+          default:
+            console.warn('🚧 unknown message', msg);
+        }
+      } catch {
+        console.error('Invalid JSON from React Native:', e.data);
+      }
+    }
+
+    window.addEventListener('message', handleNativeMessage);
+    return () => window.removeEventListener('message', handleNativeMessage);
+  }, []);
+
   return (
     <div className="flex flex-col h-screen">
       <div className="flex-1">
