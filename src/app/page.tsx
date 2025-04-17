@@ -189,6 +189,9 @@ export default function MinimalEditor() {
   }
   const handleChangeRn = (value:SerializedEditorState) => {
          // or .toString(), .getHTML()
+
+         console.log('Serialized editor state:', value);
+         
          (window as any).ReactNativeWebView?.postMessage(
           JSON.stringify({ type: 'DOC_CHANGE', payload: value })
         );
