@@ -1,1 +1,0 @@
-{"version":3,"file":"can-use-dom.js","sources":["../../../../../../src/components/lexicalEditor/components/shared/can-use-dom.ts"],"sourcesContent":[null],"names":["CAN_USE_DOM","window","document","createElement"],"mappings":"AAAO,IAAMA,EACO,oBAAXC,aACoB,IAApBA,OAAOC,eAC2B,IAAlCD,OAAOC,SAASC"}

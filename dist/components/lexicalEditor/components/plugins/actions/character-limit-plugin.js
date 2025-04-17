@@ -1,2 +1,0 @@
-import{CharacterLimitPlugin as e}from"../../../../../node_modules/@lexical/react/LexicalCharacterLimitPlugin.mjs.js";function t(t){var r=t.maxLength,a=t.charset;return React.createElement(e,{maxLength:r,charset:a,renderer:function(e){return React.createElement("div",{className:"px-1 text-xs ".concat(e.remainingCharacters<=0?"text-destructive":"text-gray-500")},e.remainingCharacters)}})}export{t as CharacterLimitPlugin};
-//# sourceMappingURL=character-limit-plugin.js.map

@@ -1,1 +1,0 @@
-{"version":3,"file":"link-plugin.js","sources":["../../../../../../src/components/lexicalEditor/components/plugins/link-plugin.tsx"],"sourcesContent":[null],"names":["LinkPlugin","React","LexicalLinkPlugin","validateUrl"],"mappings":"6KAgBgBA,IACd,OAAOC,gBAACC,EAAiB,CAACC,YAAaA,GACzC"}

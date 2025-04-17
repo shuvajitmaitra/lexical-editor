@@ -1,2 +1,0 @@
-import{INSERT_HORIZONTAL_RULE_COMMAND as e}from"../../../../../node_modules/@lexical/react/LexicalHorizontalRuleNode.mjs.js";import{ComponentPickerOption as o}from"./component-picker-option.js";import i from"../../../../../node_modules/lucide-react/dist/esm/icons/minus.js";function r(){return new o("Divider",{icon:React.createElement(i,{className:"size-4"}),keywords:["horizontal rule","divider","hr"],onSelect:function(o,i){return i.dispatchCommand(e,void 0)}})}export{r as DividerPickerPlugin};
-//# sourceMappingURL=divider-picker-plugin.js.map

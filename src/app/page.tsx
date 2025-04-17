@@ -183,6 +183,15 @@ export default function MinimalEditor() {
     }));
   };
 
+  type window ={
+    ReactNativeWebView: any
+  }
+  const handleChangeRn = (value) => {
+         // or .toString(), .getHTML()
+    window.ReactNativeWebView?.postMessage(
+      JSON.stringify({ type: 'DOC_CHANGE', payload: value })
+    );
+  };
   return (
     <div className="flex flex-col h-screen">
       <div className="flex-1">
@@ -192,7 +201,10 @@ export default function MinimalEditor() {
           }}
           height="100%"
           editorSerializedState={editorState}
-          onSerializedChange={(value) => setEditorState(value)}
+          onSerializedChange={(value) => {
+            setEditorState(value)
+            handleChangeRn(value)
+          }}
           pluginOptions={pluginOptions}
           maxLength={50000}
           onImageUpload={handleImageUpload}

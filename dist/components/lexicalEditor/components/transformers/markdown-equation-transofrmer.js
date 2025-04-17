@@ -1,2 +1,0 @@
-import{EquationNode as e,$isEquationNode as t,$createEquationNode as r}from"../nodes/equation-node.js";var n={dependencies:[e],export:function(e){return t(e)?"$".concat(e.getEquation(),"$"):null},importRegExp:/\$([^$]+?)\$/,regExp:/\$([^$]+?)\$$/,replace:function(e,t){var n=t[1],o=r(n,!0);e.replace(o)},trigger:"$",type:"text-match"};export{n as EQUATION};
-//# sourceMappingURL=markdown-equation-transofrmer.js.map

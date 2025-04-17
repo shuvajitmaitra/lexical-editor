@@ -1,2 +1,0 @@
-import{INSERT_UNORDERED_LIST_COMMAND as e}from"@lexical/list";import{ComponentPickerOption as t}from"./component-picker-option.js";import o from"../../../../../node_modules/lucide-react/dist/esm/icons/list.js";function i(){return new t("Bulleted List",{icon:React.createElement(o,{className:"size-4"}),keywords:["bulleted list","unordered list","ul"],onSelect:function(t,o){return o.dispatchCommand(e,void 0)}})}export{i as BulletedListPickerPlugin};
-//# sourceMappingURL=bulleted-list-picker-plugin.js.map
