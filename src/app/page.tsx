@@ -39,65 +39,81 @@ const initialValue = {
 export default function MinimalEditor() {
   const [editorState, setEditorState] = useState<SerializedEditorState>(initialValue);
 
+  // Define a minimal set of toolbar options
   const pluginOptions: PluginOptions = {
+    // Enable only essential features
     history: true,
     autoFocus: true,
     richText: true,
     list: true,
     link: true,
     autoLink: true,
-    checkList: false,
-    horizontalRule: false,
-    table: false,
-    excalidraw: false,
-    poll: false,
-    equations: false,
-    autoEmbed: false,
-    figma: false,
-    twitter: false,
-    youtube: false,
-    draggableBlock: false,
+
+    // Disable features we don't need
+    checkList: true,
+    horizontalRule: true,
+    table: true,
+    excalidraw: true,
+    poll: true,
+    equations: true,
+    autoEmbed: true,
+    figma: true,
+    twitter: true,
+    youtube: true,
+    draggableBlock: true,
+
+    // Show toolbar but customize which buttons appear
     showToolbar: true,
-    showBottomBar: false,
+    showBottomBar: true,
+
+    // Toolbar controls - only show basic formatting
     toolbar: {
       history: true,
       blockFormat: true,
-      fontFamily: false,
-      fontSize: false,
+      fontFamily: true, // Hide font family dropdown
+      fontSize: true, // Hide font size dropdown
+
+      // Only allow basic text formatting
       fontFormat: {
         bold: true,
         italic: true,
-        underline: true,
-        strikethrough: false,
+        underline: true, // Hide underline button
+        strikethrough: true, // Hide strikethrough button
       },
-      subSuper: false,
+
+      // Disable these buttons
+      subSuper: true,
       clearFormatting: true,
-      fontColor: false,
-      fontBackground: false,
+      fontColor: true,
+      fontBackground: true,
       elementFormat: true,
+
+      // Only allow inserting basic elements
       blockInsert: {
-        horizontalRule: false,
-        pageBreak: false,
-        image: true,
-        inlineImage: false,
-        collapsible: false,
-        excalidraw: false,
-        table: false,
-        poll: false,
-        columnsLayout: false,
-        embeds: false,
+        horizontalRule: true,
+        pageBreak: true,
+        image: true, // Allow images
+        inlineImage: true,
+        collapsible: true,
+        excalidraw: true,
+        table: true,
+        poll: true,
+        columnsLayout: true,
+        embeds: true,
       },
     },
+
+    // Minimal bottom bar
     actionBar: {
-      maxLength: false,
-      characterLimit: false,
-      counter: false,
-      speechToText: false,
-      shareContent: false,
-      markdownToggle: false,
-      editModeToggle: false,
-      clearEditor: false,
-      treeView: false,
+      maxLength: true,
+      characterLimit: true,
+      counter: true,
+      speechToText: true,
+      shareContent: true,
+      markdownToggle: true,
+      editModeToggle: true,
+      clearEditor: true,
+      treeView: true,
     },
   };
 
