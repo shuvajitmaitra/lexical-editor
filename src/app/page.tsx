@@ -200,8 +200,8 @@ export default function MinimalEditor() {
   }, []);
 
   return (
-    <div className="flex flex-col h-screen bg-gray-500">
-      <div className="flex-1 bg-gray-500">
+    <div className="flex flex-col h-screen">
+      <div className="flex-1">
         <Editor
           onChange={() => {}}
           height="100%"
