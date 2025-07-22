@@ -123,6 +123,7 @@ export function Editor({
   onAIGeneration,
   mentionMenu,
   mentionMenuItem,
+  theme = "dark", // Add theme prop with default value 'light'
 }: {
   editorState?: EditorState;
   editorSerializedState?: SerializedEditorState;
@@ -137,9 +138,21 @@ export function Editor({
   onAIGeneration?: (prompt: string, transformType: string) => Promise<{ text: string; success: boolean; error?: string }>;
   mentionMenu?: React.FC<any>;
   mentionMenuItem?: React.FC<any>;
+  theme?: "light" | "dark"; // Add theme type definition
 }) {
+  const editorConfig: InitialConfigType = {
+    namespace: "Editor",
+    theme: {
+      ...editorTheme,
+      root: theme === "dark" ? "dark" : "light",
+    },
+    nodes,
+    onError: (error: Error) => {
+      console.error(error);
+    },
+  };
   return (
-    <div className="overflow-hidden border shadow flex flex-col" style={{ height }}>
+    <div className={`overflow-hidden border shadow flex flex-col bg-background ${theme === "dark" ? "dark" : "light"}`} style={{ height }}>
       <LexicalComposer
         initialConfig={{
           ...editorConfig,
