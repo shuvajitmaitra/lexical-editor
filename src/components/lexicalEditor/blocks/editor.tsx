@@ -3,6 +3,7 @@
 import { InitialConfigType, LexicalComposer } from "@lexical/react/LexicalComposer";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { EditorState, SerializedEditorState } from "lexical";
+import { useState, useEffect } from "react";
 
 import { FloatingLinkContext } from "../components/context/floating-link-context";
 import { SharedAutocompleteContext } from "../components/context/shared-autocomplete-context";
@@ -12,9 +13,17 @@ import { TooltipProvider } from "../ui/tooltip";
 import { nodes } from "./nodes";
 import { Plugins } from "./plugins";
 import EditorMethods from "../components/shared/EditorMethods";
+import { useTheme } from "next-themes";
 
 // In editor.ts or editor.tsx file
-
+// Add this type declaration at the top of your file, after the imports
+declare global {
+  interface Window {
+    ReactNativeWebView?: {
+      postMessage: (message: string) => void;
+    };
+  }
+}
 export interface PluginOptions {
   // Main plugin options
   history?: boolean;
@@ -101,15 +110,6 @@ export interface PluginOptions {
   [key: string]: any; // To allow for future extensions
 }
 
-const editorConfig: InitialConfigType = {
-  namespace: "Editor",
-  theme: editorTheme,
-  nodes,
-  onError: (error: Error) => {
-    console.error(error);
-  },
-};
-
 export function Editor({
   editorState,
   editorSerializedState,
@@ -123,7 +123,7 @@ export function Editor({
   onAIGeneration,
   mentionMenu,
   mentionMenuItem,
-  theme = "dark", // Add theme prop with default value 'light'
+  theme: initialTheme = "light", // Add theme prop with default value 'light'
 }: {
   editorState?: EditorState;
   editorSerializedState?: SerializedEditorState;
@@ -140,19 +140,60 @@ export function Editor({
   mentionMenuItem?: React.FC<any>;
   theme?: "light" | "dark"; // Add theme type definition
 }) {
+  const [currentTheme, setCurrentTheme] = useState<"light" | "dark">(initialTheme);
+  const { setTheme } = useTheme();
+  useEffect(() => {
+    // Add global function for direct theme setting (primary method)
+    (window as any).setEditorTheme = (theme: "light" | "dark") => {
+      console.log("setEditorTheme called with:", theme);
+      setCurrentTheme(theme);
+      setTheme(theme);
+      if (window.ReactNativeWebView) {
+        window.ReactNativeWebView.postMessage(
+          JSON.stringify({
+            type: "THEME_SET_SUCCESS",
+            theme: theme,
+          })
+        );
+      }
+    };
+
+    // Notify React Native that editor is ready
+    if (window.ReactNativeWebView) {
+      window.ReactNativeWebView.postMessage(
+        JSON.stringify({
+          type: "LEXICAL_EDITOR_READY",
+        })
+      );
+    }
+
+    return () => {
+      delete (window as any).setEditorTheme;
+    };
+  }, []);
+
+  // Update theme when prop changes
+  useEffect(() => {
+    if (initialTheme !== currentTheme) {
+      setCurrentTheme(initialTheme);
+      setTheme(initialTheme);
+    }
+  }, [initialTheme]);
+
   const editorConfig: InitialConfigType = {
     namespace: "Editor",
     theme: {
       ...editorTheme,
-      root: theme === "dark" ? "dark" : "light",
+      root: currentTheme === "dark" ? "dark" : "light",
     },
     nodes,
     onError: (error: Error) => {
       console.error(error);
     },
   };
+
   return (
-    <div className={`overflow-hidden border shadow flex flex-col bg-background ${theme === "dark" ? "dark" : "light"}`} style={{ height }}>
+    <div className={`overflow-hidden border shadow flex flex-col bg-background`} style={{ height }}>
       <LexicalComposer
         initialConfig={{
           ...editorConfig,
